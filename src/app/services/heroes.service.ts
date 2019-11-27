@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HeroeModel } from '../models/heroe.model';
-import { map } from 'rxjs/operators';
+import { map, delay } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -35,6 +35,39 @@ export class HeroesService {
     return this.http.put(`${this.url}/heroes/${heroe.id}.json`, heroeTemp).pipe(
       map(resp => heroe)
     );
+  }
+
+  deleteHeroe(id: string): Observable<any> {
+    return this.http.delete(`${this.url}/heroes/${id}.json`);
+  }
+
+  getHeroe(id: string): Observable<any> {
+    return this.http.get(`${this.url}/heroes/${id}.json`);
+  }
+
+  getHeroes(): Observable<HeroeModel[]> {
+    return this.http.get(`${this.url}/heroes.json`).pipe(
+      // map(resp => this.crearArreglo(resp))
+      map(this.crearArreglo),
+      // Este delay es para retrasar la carga y poder ver el mensaje
+      delay(500)
+    );
+  }
+
+  private crearArreglo(heroesObj: object): HeroeModel[] {
+
+    const heroes: HeroeModel[] = [];
+
+    if (heroesObj === null) { return []; }
+
+    Object.keys(heroesObj).forEach(key => {
+      const heroe: HeroeModel = heroesObj[key];
+      heroe.id = key;
+
+      heroes.push(heroe);
+    });
+
+    return heroes;
   }
 
 }
